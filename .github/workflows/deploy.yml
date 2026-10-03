@@ -54,7 +54,7 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             NEXT_PUBLIC_JELLYFIN_URL=https://jellyfin.randikalakshan.site
-            NEXT_PUBLIC_JELLYFIN_TOKEN=edfd09be50474d41abe77de6bc62b52c
+            NEXT_PUBLIC_JELLYFIN_TOKEN=${{ secrets.JELLYFIN_TOKEN }}
 
       - name: Install Cloudflared
         run: |
