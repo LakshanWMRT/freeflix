@@ -17,7 +17,7 @@ Automated CI/CD and GitOps deployment pipeline for **FreeFlix** to a Raspberry P
                       └─────┬────────────┬─────┘
                             │            │
          Builds multi-arch  │            │ Auto-updates
-         (amd64 + arm64)    │            │ image tag & commits
+         (amd64 + arm/v7)   │            │ image tag & commits
                             ▼            ▼
              ┌─────────────────────┐   ┌─────────────────────┐
              │ Docker Hub Registry │   │ GitHub Repo (`k8s`) │
