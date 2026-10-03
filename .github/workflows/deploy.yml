@@ -56,12 +56,24 @@ jobs:
             NEXT_PUBLIC_JELLYFIN_URL=https://jellyfin.randikalakshan.site
             NEXT_PUBLIC_JELLYFIN_TOKEN=edfd09be50474d41abe77de6bc62b52c
 
-      - name: Deploy to Raspberry Pi via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            # Pull the latest image and restart the deployment
-            kubectl rollout restart deployment freeflix
+      - name: Install Cloudflared
+        run: |
+          curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Setup SSH and Configure Cloudflare Proxy
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          
+          cat << EOF > ~/.ssh/config
+          Host pi
+            HostName ${{ secrets.SSH_HOST }}
+            User ${{ secrets.SSH_USERNAME }}
+            ProxyCommand cloudflared access ssh --hostname %h
+            StrictHostKeyChecking no
+          EOF
+
+      - name: Deploy to Raspberry Pi
+        run: ssh pi "kubectl rollout restart deployment freeflix"
