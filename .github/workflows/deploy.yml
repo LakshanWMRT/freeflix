@@ -1,6 +1,7 @@
 name: Build, Push to Docker Hub and Trigger ArgoCD
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -55,16 +56,12 @@ jobs:
             NEXT_PUBLIC_JELLYFIN_URL=https://jellyfin.randikalakshan.site
             NEXT_PUBLIC_JELLYFIN_TOKEN=edfd09be50474d41abe77de6bc62b52c
 
-      - name: Update Kubernetes Kustomization with new Image Tag
-        run: |
-          IMAGE_TAG="${{ steps.meta.outputs.version }}"
-          echo "Updating k8s image tag to: $IMAGE_TAG"
-          cd k8s
-          # Update tag in kustomization.yaml
-          sed -i "s/newTag:.*/newTag: $IMAGE_TAG/" kustomization.yaml
-
-      - name: Commit and Push Manifest Changes
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Deploy to Raspberry Pi via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          commit_message: "chore(k8s): bump image tag to ${{ steps.meta.outputs.version }} [skip ci]"
-          file_pattern: 'k8s/kustomization.yaml'
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Pull the latest image and restart the deployment
+            kubectl rollout restart deployment freeflix
