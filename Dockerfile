@@ -1,7 +1,6 @@
 # Multi-stage Dockerfile optimized for Raspberry Pi (ARM64) and x86_64
-FROM node:20-alpine AS base
+FROM node:20-bookworm-slim AS base
 WORKDIR /app
-RUN apk add --no-cache libc6-compat
 
 # 1. Install dependencies
 FROM base AS deps
@@ -25,7 +24,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # 3. Production runner
-FROM node:20-alpine AS runner
+FROM node:20-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
