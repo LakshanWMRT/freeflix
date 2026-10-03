@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: freeflix-config
+  namespace: freeflix
+  labels:
+    app.kubernetes.io/name: freeflix
+data:
+  PORT: "3000"
+  NEXT_PUBLIC_JELLYFIN_URL: "https://jellyfin.randikalakshan.site"
+  NEXT_PUBLIC_JELLYFIN_TOKEN: "edfd09be50474d41abe77de6bc62b52c"

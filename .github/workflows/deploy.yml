@@ -1,0 +1,70 @@
+name: Build, Push to Docker Hub and Trigger ArgoCD
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - '.gitignore'
+
+jobs:
+  build-and-push:
+    name: Build Multi-Arch Docker Image and Push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU (for ARM64 / Raspberry Pi support)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME || 'r466670' }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME || 'r466670' }}/freeflix
+          tags: |
+            type=sha,format=short,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NEXT_PUBLIC_JELLYFIN_URL=https://jellyfin.randikalakshan.site
+            NEXT_PUBLIC_JELLYFIN_TOKEN=edfd09be50474d41abe77de6bc62b52c
+
+      - name: Update Kubernetes Kustomization with new Image Tag
+        run: |
+          IMAGE_TAG="${{ steps.meta.outputs.version }}"
+          echo "Updating k8s image tag to: $IMAGE_TAG"
+          cd k8s
+          # Update tag in kustomization.yaml
+          sed -i "s/newTag:.*/newTag: $IMAGE_TAG/" kustomization.yaml
+
+      - name: Commit and Push Manifest Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(k8s): bump image tag to ${{ steps.meta.outputs.version }} [skip ci]"
+          file_pattern: 'k8s/kustomization.yaml'
