@@ -12,7 +12,7 @@ export function HeroBanner({ movie, onPlay }: HeroBannerProps) {
   return (
     <section className="relative h-[70vh] min-h-[520px] w-full md:h-[85vh]">
       <img
-        src="/movies/hero-backdrop.png"
+        src="/movies/3.jpeg"
         alt={`${movie.title} backdrop`}
         className="absolute inset-0 h-full w-full object-cover"
       />

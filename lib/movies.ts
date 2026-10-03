@@ -9,6 +9,8 @@ export type Movie = {
   genres: string[]
   description: string
   videoUrl: string
+  type?: string
+  isSeries?: boolean
 }
 
 const SAMPLE_VIDEOS = [

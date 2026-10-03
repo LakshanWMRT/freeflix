@@ -5,7 +5,13 @@ import { Bell, Search } from "lucide-react"
 
 const NAV_LINKS = ["Home", "TV Shows", "Movies", "New & Popular", "My List"]
 
-export function Navbar() {
+export function Navbar({ 
+  activeTab = "Home", 
+  onTabChange 
+}: { 
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
+}) {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -29,14 +35,17 @@ export function Navbar() {
         <ul className="ml-4 hidden items-center gap-5 text-sm text-neutral-200 lg:flex">
           {NAV_LINKS.map((link, i) => (
             <li key={link}>
-              <a
-                href="#"
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  if (onTabChange) onTabChange(link)
+                }}
                 className={`transition-colors hover:text-white ${
-                  i === 0 ? "font-semibold text-white" : ""
+                  activeTab === link ? "font-semibold text-white" : ""
                 }`}
               >
                 {link}
-              </a>
+              </button>
             </li>
           ))}
         </ul>
