@@ -16,9 +16,9 @@ else
   docker buildx use "$BUILDER_NAME"
 fi
 
-# Build for both amd64 and arm64 (Raspberry Pi) and push
+# Build for both amd64 and arm/v7 (Raspberry Pi 3) and push
 docker buildx build \
-  --platform linux/amd64,linux/arm64 \
+  --platform linux/amd64,linux/arm/v7 \
   --build-arg NEXT_PUBLIC_JELLYFIN_URL="https://jellyfin.randikalakshan.site" \
   --build-arg NEXT_PUBLIC_JELLYFIN_TOKEN="edfd09be50474d41abe77de6bc62b52c" \
   -t "${IMAGE_NAME}:${TAG}" \
